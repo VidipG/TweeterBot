@@ -2,6 +2,7 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -13,34 +14,36 @@ public class TwitterAutoBot {
   }
 
   private static void tweetLines() {
-    String line;
-    try {
-      try (InputStream fis = new FileInputStream(
-          "/Users/Vidip/Everything/CS/Java/Intellij/TwitterBot1/src/main/resources/tweets.txt");
-          InputStreamReader isr = new InputStreamReader(fis, Charset.forName("Cp1252"));
-          BufferedReader br = new BufferedReader(isr);) {
+    String tweet;
+    int count = 0;
+    while (count < 10) {
+      try {
+        try (InputStream fis = new FileInputStream(
+            "/Users/Vidip/Everything/CS/Java/Intellij/TwitterBot1/src/main/resources/tweets.txt");
+            InputStreamReader isr = new InputStreamReader(fis, Charset.forName("Cp1252"));
+            BufferedReader br = new BufferedReader(isr);) {
           FactGeneration.getFacts();
-        while ((line = br.readLine()) != null) {
-          // Deal with the line
-          sendTweet(line);
-          System.out.println("Tweeting: " + line + "...");
-
-          try {
-            System.out.println("Sleeping for 30 minutes...");
-            Thread.sleep(1800000); // every 30 minutes
-            // Thread.sleep(10000); // every 10 seconds
+          tweet=br.readLine();
+          while (tweet != null) {
+            sendTweet(tweet);
+            System.out.println(tweet);
+            try {
+              int sleepTime = 18000;
+              System.out.printf("Sleeping for %d seconds", sleepTime / 1000);
+              Thread.sleep(sleepTime);
+            }
+            catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+            tweet = br.readLine();
           }
-          catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-
         }
       }
+      catch (IOException e) {
+        e.printStackTrace();
+      }
+      count += 1;
     }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
-
   }
 
   private static void sendTweet(String line) {
@@ -51,9 +54,7 @@ public class TwitterAutoBot {
       System.out.println(status);
     }
     catch (TwitterException e) {
-      ;
       e.printStackTrace();
     }
   }
-
 }
